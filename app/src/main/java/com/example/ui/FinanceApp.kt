@@ -1539,7 +1539,10 @@ fun SettingsTab(viewModel: FinanceViewModel) {
     val gso = remember {
         GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestEmail()
-            .requestScopes(Scope("https://www.googleapis.com/auth/drive.file"))
+            .requestScopes(
+                Scope("https://www.googleapis.com/auth/drive.file"),
+                Scope("https://www.googleapis.com/auth/drive")
+            )
             .build()
     }
     val googleSignInClient = remember { GoogleSignIn.getClient(context, gso) }
@@ -1562,11 +1565,27 @@ fun SettingsTab(viewModel: FinanceViewModel) {
                 val email = account.email ?: "Unknown"
                 viewModel.viewModelScope.launch(Dispatchers.IO) {
                     try {
-                        val token = GoogleAuthUtil.getToken(
-                            context,
-                            account.account ?: android.accounts.Account(email, "com.google"),
-                            "oauth2:https://www.googleapis.com/auth/drive.file"
-                        )
+                        val token = try {
+                            GoogleAuthUtil.getToken(
+                                context,
+                                account.account ?: android.accounts.Account(email, "com.google"),
+                                "oauth2:https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive"
+                            )
+                        } catch (e: Exception) {
+                            try {
+                                GoogleAuthUtil.getToken(
+                                    context,
+                                    account.account ?: android.accounts.Account(email, "com.google"),
+                                    "oauth2:https://www.googleapis.com/auth/drive.file"
+                                )
+                            } catch (e2: Exception) {
+                                GoogleAuthUtil.getToken(
+                                    context,
+                                    account.account ?: android.accounts.Account(email, "com.google"),
+                                    "oauth2:https://www.googleapis.com/auth/drive"
+                                )
+                            }
+                        }
                         viewModel.setGoogleAccessToken(email, token)
                     } catch (recoverable: UserRecoverableAuthException) {
                         kotlinx.coroutines.withContext(Dispatchers.Main) {
