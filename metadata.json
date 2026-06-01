@@ -1,0 +1,6 @@
+{
+  "name": "হিসাব নিকাশ",
+  "description": "দৈনন্দিন ব্যক্তিগত আয়-ব্যয় এবং বাজেট ট্র্যাকিং অ্যাপ",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
